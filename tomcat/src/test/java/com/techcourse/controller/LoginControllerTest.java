@@ -13,12 +13,32 @@ import org.junit.jupiter.api.Test;
 class LoginControllerTest {
 
     @Test
+    void missingAccountIsHandledAsAuthenticationFailure() throws Exception {
+        LoginController controller = new LoginController();
+        HttpResponse response = HttpResponse.empty();
+
+        controller.service(loginRequest("password=password"), response);
+
+        assertThat(response.header("Location")).contains("/401.html");
+    }
+
+    @Test
+    void missingPasswordIsHandledAsAuthenticationFailure() throws Exception {
+        LoginController controller = new LoginController();
+        HttpResponse response = HttpResponse.empty();
+
+        controller.service(loginRequest("account=gugu"), response);
+
+        assertThat(response.header("Location")).contains("/401.html");
+    }
+
+    @Test
     void successfulLoginInvalidatesExistingSessionBeforeCreatingANewOne() throws Exception {
         // given
         String existingSessionId = "existing-session";
         SessionManager.add(new Session(existingSessionId));
         LoginController controller = new LoginController();
-        HttpRequest request = loginRequest(existingSessionId);
+        HttpRequest request = successfulLoginRequest(existingSessionId);
         HttpResponse response = HttpResponse.empty();
 
         // when
@@ -36,8 +56,16 @@ class LoginControllerTest {
         SessionManager.remove(newSessionId);
     }
 
-    private HttpRequest loginRequest(String sessionId) throws Exception {
+    private HttpRequest successfulLoginRequest(String sessionId) throws Exception {
         String body = "account=gugu&password=password";
+        return loginRequest(body, sessionId);
+    }
+
+    private HttpRequest loginRequest(String body) throws Exception {
+        return loginRequest(body, "");
+    }
+
+    private HttpRequest loginRequest(String body, String sessionId) throws Exception {
         String rawRequest = String.format("POST /login HTTP/1.1\r\n"
             + "Host: localhost:8080\r\n"
             + "Cookie: JSESSIONID=%s\r\n"

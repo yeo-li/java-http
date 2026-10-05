@@ -47,6 +47,9 @@ public final class LoginController extends AbstractController {
     }
 
     private Optional<User> authenticateUser(String account, String password) {
+        if (account == null || password == null) {
+            return Optional.empty();
+        }
         return InMemoryUserRepository.findByAccount(account)
             .filter(user -> user.checkPassword(password));
     }
