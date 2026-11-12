@@ -7,7 +7,7 @@ public final class RequestMapping {
 
     private final Controller staticResourceController = new StaticResourceController();
     private final Map<String, Controller> controllers = Map.of(
-        "/login?", new LoginController(),
+        "/login", new LoginController(),
         "/register", new RegisterController(),
         "/index", new IndexController(),
         "/index.html", new IndexController()
